@@ -10,6 +10,7 @@ class TODOItem {
   const todoButton = document.querySelector(".todo-button");
   const todoList = document.querySelector(".todo-list");
   const filterOption = document.querySelector(".filter-todo");
+  let currentTodo;
   
   const UNCOMPLETED = "UNCOMPLETED";
   const COMPLETED = "COMPLETED";
@@ -19,7 +20,7 @@ class TODOItem {
   todoButton.addEventListener("click", addTodo);
   todoList.addEventListener("click", deleteCheck);
   filterOption.addEventListener("click", filterTodo);
-  
+
   // Functions
   function deleteCheck(e) {
     const item = e.target;
@@ -41,31 +42,44 @@ class TODOItem {
   function addTodo(event) {
     // prevent form from submitting
     event.preventDefault();
-    // create Todo div
-    const todoDiv = document.createElement("div");
-    todoDiv.classList.add("todo");
-    // create list item
-    const newTodo = document.createElement("li");
-    newTodo.innerText = todoInput.value;
-    newTodo.classList.add("todo-item");
-    todoDiv.appendChild(newTodo);
-    // add todo to local storage
-    saveLocalTodos(new TODOItem(todoInput.value, UNCOMPLETED));
-  
-    // create mark complete button
-    const completedButton = document.createElement("button");
-    completedButton.innerHTML = '<i class="fas fa-check"></i>';
-    completedButton.classList.add("complete-btn");
-    todoDiv.appendChild(completedButton);
-    // create trash button
-    const trashButton = document.createElement("button");
-    trashButton.innerHTML = '<i class="fas fa-trash"></i>';
-    trashButton.classList.add("trash-btn");
-    todoDiv.appendChild(trashButton);
-  
-    // append the todo-div to the list
-    todoList.appendChild(todoDiv);
-  
+    let myIcon = document.getElementById('myIcon');
+    if(myIcon.className =="fas fa-pencil-alt" && currentTodo){
+      // edit Todo
+      let todos = JSON.parse(localStorage.getItem("todos"));
+      let oldValue = currentTodo.target.innerText;
+      let index = todos.findIndex(todo => todo.text === oldValue);
+      todos[index].text=todoInput.value;
+      currentTodo.target.innerText = todoInput.value;
+      document.getElementById('myIcon').className ="fas fa-plus-square";
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }else{
+      // create Todo div
+      const todoDiv = document.createElement("div");
+      todoDiv.classList.add("todo");
+      // create list item
+      const newTodo = document.createElement("li");
+      newTodo.innerText = todoInput.value;
+      newTodo.classList.add("todo-item");
+      newTodo.addEventListener("dblclick",handleDoubleClick.bind(newTodo));
+      todoDiv.appendChild(newTodo);
+      // add todo to local storage
+      saveLocalTodos(new TODOItem(todoInput.value, UNCOMPLETED));
+    
+      // create mark complete button
+      const completedButton = document.createElement("button");
+      completedButton.innerHTML = '<i class="fas fa-check"></i>';
+      completedButton.classList.add("complete-btn");
+      todoDiv.appendChild(completedButton);
+      // create trash button
+      const trashButton = document.createElement("button");
+      trashButton.innerHTML = '<i class="fas fa-trash"></i>';
+      trashButton.classList.add("trash-btn");
+      todoDiv.appendChild(trashButton);
+    
+      // append the todo-div to the list
+      todoList.appendChild(todoDiv);
+    }
+
     //clear todo input value
     todoInput.value = "";
   }
@@ -141,6 +155,7 @@ class TODOItem {
     const newTodo = document.createElement("li");
     newTodo.innerText = todo.text;
     newTodo.classList.add("todo-item");
+    newTodo.addEventListener("dblclick",handleDoubleClick.bind(newTodo));
     if (todo.status === COMPLETED) {
       todoDiv.classList.toggle("completed");
     }
@@ -159,6 +174,14 @@ class TODOItem {
   
     // append the todo-div to the list
     todoList.appendChild(todoDiv);
+  }
+
+  let handleDoubleClick = (newTodo) => {
+    console.log('yoo',newTodo.target.innerText);
+    todoInput.value = newTodo.target.innerText;
+    currentTodo = newTodo;
+    document.getElementById('myIcon').className ="fas fa-pencil-alt";
+    
   }
   
   function removeLocalTodos(todoText) {
