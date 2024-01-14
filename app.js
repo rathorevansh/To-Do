@@ -4,13 +4,14 @@ class TODOItem {
       this.status = status;
     }
   }
+
+  let currentTodo;
   
   // Selectors
   const todoInput = document.querySelector(".todo-input");
   const todoButton = document.querySelector(".todo-button");
   const todoList = document.querySelector(".todo-list");
   const filterOption = document.querySelector(".filter-todo");
-  let currentTodo;
   
   const UNCOMPLETED = "UNCOMPLETED";
   const COMPLETED = "COMPLETED";
@@ -27,7 +28,7 @@ class TODOItem {
     // DELETE TODO
     if (item.classList[0] === "trash-btn") {
       const todo = item.parentElement;
-        todo.remove();
+      todo.remove();
     }
   
     // CHECK MARK
@@ -46,8 +47,7 @@ class TODOItem {
     if(myIcon.className =="fas fa-pencil-alt" && currentTodo){
       // edit Todo
       let todos = JSON.parse(localStorage.getItem("todos"));
-      let oldValue = currentTodo.target.innerText;
-      let index = todos.findIndex(todo => todo.text === oldValue);
+      let index = todos.findIndex(todo => todo.text === currentTodo.target.innerText);
       todos[index].text=todoInput.value;
       currentTodo.target.innerText = todoInput.value;
       document.getElementById('myIcon').className ="fas fa-plus-square";
@@ -92,18 +92,10 @@ class TODOItem {
           todo.style.display = "flex";
           break;
         case "completed":
-          if (todo.classList.contains("completed")) {
-            todo.style.display = "flex";
-          } else {
-            todo.style.display = "none";
-          }
+          todo.style.display = todo.classList.contains("completed")? "flex":"none";
           break;
         case "uncompleted":
-          if (!todo.classList.contains("completed")) {
-            todo.style.display = "flex";
-          } else {
-            todo.style.display = "none";
-          }
+          todo.style.display = !todo.classList.contains("completed")? "flex":"none";
           break;
       }
     });
@@ -111,17 +103,9 @@ class TODOItem {
   
   function saveLocalTodos(todo) {
     // check if already data exists
-    let todos;
-    if (localStorage.getItem("todos") === null) {
-      todos = [];
-    } else {
-      todos = JSON.parse(localStorage.getItem("todos"));
-    }
-  
+    let todos = localStorage.getItem("todos") === null? []:JSON.parse(localStorage.getItem("todos")) ;
     const itemIndex = todos.findIndex((element, index) => {
-      if (element.text === todo.text) {
-        return true;
-      }
+      if (element.text === todo.text) return true;
     });
     if (itemIndex == -1) {
       todos.push(todo);
@@ -138,12 +122,7 @@ class TODOItem {
   
   function getTodos() {
     // check if already data exists
-    let todos;
-    if (localStorage.getItem("todos") === null) {
-      todos = [];
-    } else {
-      todos = JSON.parse(localStorage.getItem("todos"));
-    }
+    let todos = localStorage.getItem("todos") === null? []:JSON.parse(localStorage.getItem("todos"));
     todos.forEach((todo) => createTodoItem(todo));
   }
   
@@ -177,28 +156,18 @@ class TODOItem {
   }
 
   let handleDoubleClick = (newTodo) => {
-    console.log('yoo',newTodo.target.innerText);
-    todoInput.value = newTodo.target.innerText;
     currentTodo = newTodo;
+    todoInput.value = newTodo.target.innerText;
     document.getElementById('myIcon').className ="fas fa-pencil-alt";
-    
   }
   
   function removeLocalTodos(todoText) {
-    let todos;
-    if (localStorage.getItem("todos") === null) {
-      todos = [];
-    } else {
-      todos = JSON.parse(localStorage.getItem("todos"));
-    }
+    let todos = localStorage.getItem("todos") === null? []:JSON.parse(localStorage.getItem("todos"));
     const itemIndex = todos.findIndex((element, index) => {
       if (element.text === todoText) {
         return true;
       }
     });
-  
-    if (itemIndex != -1) {
-      todos.splice(itemIndex, 1);
-    }
+    if (itemIndex != -1) todos.splice(itemIndex, 1);
     localStorage.setItem("todos", JSON.stringify(todos));
   }
